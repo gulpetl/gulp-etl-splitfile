@@ -1,0 +1,18 @@
+{
+  "name": "gulp-datatube-starter",
+  "version": "1.0.0",
+  "description": "Starter for gulp plugin",
+  "main": "gulpfile.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^10.12.18",
+    "gulp": "^4.0.0",
+    "ts-node": "^7.0.1",
+    "typescript": "^3.2.2"
+  }
+}
