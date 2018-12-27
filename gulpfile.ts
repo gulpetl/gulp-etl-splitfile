@@ -2,30 +2,33 @@ let gulp = require('gulp')
 import * as plugins from './module'
 const split = require('split')
 
+ function build(callback:any) {
 
-gulp.task('default', build)
-
-async function build() {
-    // console.log('args: ' + args)
-    // let buffer = await fse.readFile('../../' + args[1])
-    //let config = JSON.parse(buffer.toString())
-  
-    return new Promise((resolve, reject) => {
-      gulp
+    let result
+       result = gulp
         .src('./testdata/*', { buffer: false })
         //.src('./testdata/*') // buffer is true by default
       
         .pipe(plugins.addProperties({propsToAdd:{extraParam:1}}))
+        .on('error', function(this:any,err: any) {
+          console.error(err)
+          err.showStack = true
+          callback(err)
+          
+          // reconnect the pipe
+          //this.pipe(plugins.addProperties({propsToAdd:{extraParam:1}}))
+        })
         .pipe(gulp.dest('./output/processed'))
         .on('end', function() {
           console.log('end')
-          resolve()
+          callback()
         })
         .on('error', function(err: any) {
           console.error(err)
-          resolve(err)
+          callback(err)
         })
-    }).catch(err => {
-      console.error(err.stack)
-    })
+
+    return result;
   }
+
+  exports.default = gulp.series(build)

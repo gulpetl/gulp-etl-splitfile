@@ -1,7 +1,11 @@
-const through2 = require('through2');
-import Vinyl from 'vinyl';
-import { Stream } from 'stream';
+const through2 = require('through2')
+import Vinyl from 'vinyl'
 const split = require('split')
+import * as PluginError from 'plugin-error'
+//var PluginError = require('plugin-error');
+
+// consts
+const PLUGIN_NAME = 'gulp-datatube-namehere';
 
   /* This is a prototype for a data.tube plugin. It will be compliant with best practices (see
   https://github.com/gulpjs/gulp/blob/master/docs/writing-a-plugin/guidelines.md#what-does-a-good-plugin-look-like ),
@@ -23,50 +27,60 @@ const split = require('split')
     // since we're in object mode, dataLine comes as a string. Since we're counting on split
     // to have already been called upstream, dataLine will be a single line at a time
     transformer._transform = function(dataLine:string, encoding: string, callback: Function) {
+      let returnErr: any = null
       try {
         let handledLine = handleLine(dataLine)
-        console.log(handledLine);
+        console.log(handledLine)
         this.push(handledLine + '\n');
-      } catch {
-        // TODO: deal with errors
+      } catch (err) {
+        returnErr = new PluginError(PLUGIN_NAME, err);
       }
       
-      callback()
+      callback(returnErr)
     }
 
     // see https://stackoverflow.com/a/52432089/5578474 for a note on the "this" param
     const strm = through2.obj(function(this:any, file: Vinyl, encoding: string, cb: Function) {
-      const self = this;
+      const self = this
+      let returnErr: any = null
       if (file.isNull()) {
         // return empty file
-        return cb(null, file)
+        return cb(returnErr, file)
       } else if (file.isBuffer()) {
         const strArray = (file.contents as Buffer).toString().split(/\r?\n/)
         for (let dataIdx in strArray) {
           try {
             strArray[dataIdx] = handleLine((strArray[dataIdx].toString()))
-          } catch {
-            // TODO: deal with errors
+          } catch (err) {
+            err = new PluginError(PLUGIN_NAME, err);
           }
         }
         let data = strArray.join('\n')
         console.log(data)
         file.contents = new Buffer(data)
-        cb(null, file)
+        cb(returnErr, file)
         //return
         } else if (file.isStream()) {
 
           file.contents = file.contents.pipe(split()).pipe(transformer)
           .on('finish', function() {
-            // use finish event instead of end since this is a Transform stream   https://nodejs.org/api/stream.html#stream_events_finish_and_end
+            // using finish event here instead of end since this is a Transform stream   https://nodejs.org/api/stream.html#stream_events_finish_and_end
 
             console.log('finished')
             
             // make sure the file goes through the next gulp plugin
             self.push(file)
             // tell the stream engine that we are done with this file
-            cb();
-          })  
+            cb(returnErr);
+          })
+          // .on('end', function(err: any) {
+          //   //console.error(err)
+          //   returnErr = err
+          // })
+          .on('error', function(err: any) {
+            //console.error(err)
+            cb(new PluginError(PLUGIN_NAME, err))
+          })
       }
 
     })
@@ -78,9 +92,9 @@ const split = require('split')
 // TODO: handle errors, as indicated below
 // 
   
-var PluginError = require('plugin-error');
+//var PluginError = require('plugin-error');
 // consts
-const PLUGIN_NAME = 'gulp-prefixer';
+// const PLUGIN_NAME = 'gulp-prefixer';
 
 function prefixStream(prefixText:Buffer) {
   var stream = through2();
