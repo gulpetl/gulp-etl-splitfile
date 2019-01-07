@@ -1,5 +1,5 @@
 let gulp = require('gulp')
-import * as plugins from './module'
+import * as linehandler from './module'
 const split = require('split')
 
 import _ from 'highland'
@@ -10,7 +10,7 @@ const plumber = require('gulp-plumber')
        result = 
         _(gulp.src('./testdata/*', { buffer: false }))
         //.src('./testdata/*') // buffer is true by default
-        .through(plugins.addProperties({propsToAdd:{extraParam:1}}))
+        .through(linehandler.handler({propsToAdd:{extraParam:1}}))
         .errors((err, push) => {
           // if (err.statusCode === 404) {
           //   // not found, return empty doc
@@ -46,13 +46,24 @@ const plumber = require('gulp-plumber')
     return result;
   }
 
+  // handleLine could be the only needed piece to be replaced for most dataTube plugins
+  const handleLine = (lineObj : Object): Object => {
+    //console.log(line)
+    for (let propName in lineObj) {
+      let obj = (<any>lineObj)
+      if (typeof(obj[propName]) == "string")
+        obj[propName] = obj[propName].toUpperCase()
+    }
+    return lineObj
+  }
+
   function build_plumber(callback:any) {
     let result
        result = 
         gulp.src('./testdata/*', { buffer: false })
         //.src('./testdata/*') // buffer is true by default
 //        .pipe(plumber({errorHandler:false}))
-        .pipe(plugins.addProperties({propsToAdd:{extraParam:1}}))
+        .pipe(linehandler.handler({propsToAdd:{extraParam:1}}, handleLine))
         .on('error', console.error.bind(console))
         // .on('error', function(this:any,err: any) {
         //   console.error(err)
