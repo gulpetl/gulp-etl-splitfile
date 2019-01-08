@@ -2,27 +2,32 @@ const through2 = require('through2')
 import Vinyl from 'vinyl'
 const split = require('split')
 import PluginError from 'plugin-error';
-
+import { writeFileSync } from 'fs-extra';
 // consts
 const PLUGIN_NAME = 'gulp-datatube-handlelines';
-
-export type TransformCallback = (lineObj: Object) => Object | null
 
 /* This is a model data.tube plugin. It is compliant with best practices for Gulp plugins (see
 https://github.com/gulpjs/gulp/blob/master/docs/writing-a-plugin/guidelines.md#what-does-a-good-plugin-look-like ),
 but with an additional feature: it accepts a configObj as its first parameter */
-export function handler(configObj: any, newHandleLine?: TransformCallback) {
-  let propsToAdd = configObj.propsToAdd
+export function saveState(configObj: any) {
 
-  // handleLine could be the only needed piece to be replaced for most dataTube plugins
-  const defaultHandleLine = (lineObj: Object): Object | null => {
-    for (let propName in propsToAdd) {
-      (lineObj as any)[propName] = propsToAdd[propName]
+  let fileName = configObj.fileName ? configObj.fileName : 'state.json';
+  let removeState = configObj.removeState ? configObj.removeState : false;
+
+  const handleLine = (lineObj: Object): Object | null => {
+    try {
+      if (lineObj && (lineObj as any).type === 'STATE') {
+        writeFileSync(fileName, JSON.stringify((lineObj as any).value));
+        if (removeState) {
+          return null;
+        }
+      }
+    } catch (err) {
+      throw new PluginError(PLUGIN_NAME, err);//error not showing up but being caught in the _transform function
     }
-    return lineObj
-  }
 
-  const handleLine: TransformCallback = newHandleLine ? newHandleLine : defaultHandleLine
+    return lineObj;
+  }
 
   let transformer = through2.obj(); // new transform stream, in object mode
   // since we're in object mode, dataLine comes as a string. Since we're counting on split
@@ -37,13 +42,14 @@ export function handler(configObj: any, newHandleLine?: TransformCallback) {
         let handledLine = JSON.stringify(handledObj)
         console.log(handledLine)
         this.push(handledLine + '\n');
+        //throw new PluginError(PLUGIN_NAME,"errrrror");//error not showing up but is being caught
       }
     } catch (err) {
       returnErr = new PluginError(PLUGIN_NAME, err);
     }
-    
+      
     callback(returnErr)
-
+    
   }
 
   // creating a stream through which each file will pass
