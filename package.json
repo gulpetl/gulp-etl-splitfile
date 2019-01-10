@@ -1,9 +1,11 @@
 {
-  "name": "gulp-datatube-starter",
+  "name": "gulp-datatube-streamsplitter",
   "version": "1.0.0",
-  "description": "Starter for gulp plugin",
-  "main": "gulpfile.ts",
+  "description": "Splits a single vinyl object stream into multiple",
+  "main": "dist/js/gulpfile.js",
+  "typings": "dist/types/gulpfile.d.ts",
   "scripts": {
+    "build-codeonly": "tsc && tsc --module commonjs --outDir dist/lib",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
