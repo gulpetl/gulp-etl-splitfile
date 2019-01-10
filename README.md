@@ -14,29 +14,29 @@ This is a **data.tube** plugin, and as such it is a [gulp](https://gulpjs.com/) 
 **data.tube** plugins accept a configObj as its first parameter. The configObj
 will contain any info the plugin needs.
 
-In addition, this plugin also accepts a TransformCallback function. That function will receive a 
-Singer message object (a [RECORD](https://github.com/singer-io/getting-started/blob/master/docs/SPEC.md#record-message), [SCHEMA](https://github.com/singer-io/getting-started/blob/master/docs/SPEC.md#schema-message) or [STATE](https://github.com/singer-io/getting-started/blob/master/docs/SPEC.md#state-message)) and is expected to return either the Singer message object (whether transformed or unchanged) to be passed downstream, or ```null``` to remove the message from the stream).
+This plugin will check for the following parameters in the configObj:
+
+- `fileName: string` - the path to the place the State will be saved, defaults to `"state.json"`
+- `removeState: boolean` - remove the State from the pipeline or keep, defaults to `false`
 
 ##### Sample gulpfile.js
 ```
-let handleLines = require('gulp-datatube-handlelines')
+function build_plumber(callback: any) {
+  let result
+  result =
+    gulp.src('./testdata/*', { buffer: false })
+      .pipe(saveState({fileName:'state.json', removeState:true}))
+      .pipe(gulp.dest('./output/processed'))
+      .on('end', function () {
+        console.log('end')
+        callback()
+      })
+      .on('error', function (err: any) {
+        console.error(err)
+        callback(err)
+      })
 
-const transformCallback = (lineObj) => {
-    // return null to remove this line
-    if (!lineObj.record || !lineObj.record["TestValue"]) {return null}
-    
-    // optionally make changes to lineObj
-    lineObj.record["NewProperty"] = "asdf"
-
-    // return the changed lineObj
-    return lineObj
-}
-
-exports.default = function() {
-    return src('data/*.ndjson')
-    // pipe the files through our handlelines plugin
-    .pipe(handleLines.handle({}, transformCallback))
-    .pipe(dest('output/'));
+  return result;
 }
 ```
 ### Model Plugin
