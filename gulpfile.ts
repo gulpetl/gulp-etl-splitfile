@@ -1,6 +1,7 @@
 let gulp = require('gulp')
-import * as lineH from './plugin'
-export {saveState} from './plugin';
+// import {splitStream} from './plugin'
+// export {splitStream} from './plugin';
+import {handler} from './plugin';
 
 import _ from 'highland'
 //import * as plumber from 'gulp-plumber'
@@ -10,7 +11,7 @@ function build(callback: any) {
   result =
     _(gulp.src('./testdata/*', { buffer: false }))
       //.src('./testdata/*') // buffer is true by default
-      .through(lineH.saveState({fileName: 'output/state.json', removeState: false }))
+      .through(handler({}))
       .errors((err, push) => {
         // if (err.statusCode === 404) {
         //   // not found, return empty doc
@@ -61,11 +62,11 @@ const handleLine = (lineObj: Object): Object => {
 function build_plumber(callback: any) {
   let result
   result =
-    gulp.src('./testdata/*',{ buffer: false } )//,
+    gulp.src('./testdata/*',{ buffer: false } )//,{ buffer: false }
       //.src('./testdata/*') // buffer is true by default
       //        .pipe(plumber({errorHandler:false}))
-      //.pipe(lineH.saveState({fileName:'state.json', removeState:true}))
-      .pipe(lineH.saveState({fileName:'state.json',removeState:true}))
+      //.pipe(lineH.splitStream({fileName:'state.json', removeState:true}))
+      .pipe(handler({}))
        .on('error', console.error.bind(console))
       // .on('error', function(this:any,err: any) {
       //   console.error(err)
