@@ -7,90 +7,47 @@ const split = require('split')
 // consts
 const PLUGIN_NAME = 'gulp-datatube-splitstream';
 
-// export function splitStream(configObj:any){
-//   let state:object|null = null;
-//   const handleLine = (lineObj: object): object | null => {
-//     try {
-//       if(lineObj && (lineObj as any).type === 'STATE'){
-//         state = lineObj;
-//         return null;
-//       }
-//       if(state != null && lineObj && (lineObj as any).type === 'RECORD'){
-//         let newFile = new Vinyl({
-//           contents: Buffer.from(JSON.stringify(state) + '\n' + JSON.stringify(lineObj))
-//         })
-
-//         return newFile;
-//       }else if(lineObj){
-//         let newFile = new Vinyl({
-//           contents: Buffer.from(JSON.stringify(lineObj))
-//         })
-
-//         return newFile;
-//       }else{
-//         return null;
-//       }
-//     } catch (err) {
-//       throw new PluginError(PLUGIN_NAME, err);
-//     }
-//   }
-
-//   return handler(configObj, handleLine);
-// }
-
 
 export type TransformCallback = (lineObj: Object) => Object | null
 
 /* This is a model data.tube plugin. It is compliant with best practices for Gulp plugins (see
 https://github.com/gulpjs/gulp/blob/master/docs/writing-a-plugin/guidelines.md#what-does-a-good-plugin-look-like ),
 but with an additional feature: it accepts a configObj as its first parameter */
-export function handler(configObj: any, newHandleLine?: TransformCallback) {
+export function streamSplitter(configObj: any) {
+  let index: number = configObj.index? configObj.index : 1;
+  let includeState: boolean = configObj.includeState? configObj.includeState : false;
   let state: object | null = null;
+  let count: number = 0;
+  let result: string = '';
+  let fileCount: number = 0;
 
   const handleLine = (lineObj: object): object | null => {
-    let count: number = 0
-    const dt: Date = new Date()
-    const dateStamp =
-      Number(String(dt.getFullYear()).substr(2, 2))
-        .toString(32)
-        .padStart(2, '0') + // 2-digit year converted to base32
-      (dt.getMonth() + 1).toString(32) + // month (1-12) converted to base32
-      dt.getDate().toString(32) + // day (1-31) converted to base 32
-      '_' +
-      // hmmss, where h is in base32, but mmss is in normal base10 (base 10 for readability; we can't save any digits by using base32)
-      dt.getHours().toString(32) +
-      String(dt.getMinutes()).padStart(2, '0') +
-      String(dt.getSeconds()).padStart(2, '0') +
-      '_' +
-      // milliseconds, in base32
-      dt
-        .getMilliseconds()
-        .toString(32)
-        .padStart(2, '0')
-
+    const dateStamp = getDateStamp();
+  
     try {
       if (lineObj && (lineObj as any).type === 'STATE') {
         state = lineObj;
         return null;
       }
-      if (state != null && lineObj && (lineObj as any).type === 'RECORD') {
+      if (lineObj && (lineObj as any).type === 'RECORD') {
+        result += JSON.stringify(lineObj) + '\n';
+        count++;
+      } 
+
+      if(count >= index || (!lineObj)){
         let newFile = new Vinyl({
           path: 'lines.txt',
-          contents: Buffer.from(JSON.stringify(state) + '\n' + JSON.stringify(lineObj))
+          contents: Buffer.from(result)
         })
-        newFile.stem = newFile.stem + ' ' + dateStamp + count // add a timestamp and then a digit to end of file name, e.g. foo.txt becomes foo 0j14_e1259_9q1.txt
+        newFile.stem = newFile.stem + ' ' + dateStamp+fileCount  // add a timestamp and then a digit to end of file name, e.g. foo.txt becomes foo 0j14_e1259_9q1.txt
+        count = 0;
+        result = '';
+        fileCount++;
         return newFile;
-      } else if (lineObj) {
-        let newFile = new Vinyl({
-          path: 'lines.txt',
-          contents: Buffer.from(JSON.stringify(lineObj))
-        })
-        newFile.stem = newFile.stem + ' ' + dateStamp + count // add a timestamp and then a digit to end of file name, e.g. foo.txt becomes foo 0j14_e1259_9q1.txt
-        return newFile;
-      } else {
+      }else{
         return null;
       }
-      
+
     } catch (err) {
       throw new PluginError(PLUGIN_NAME, err);
     }
@@ -143,7 +100,7 @@ export function handler(configObj: any, newHandleLine?: TransformCallback) {
           if (tempLine) strArray[dataIdx] = JSON.stringify(tempLine)
           if (tempLine) {
             resultArray.push(JSON.stringify(tempLine))
-
+            console.log("Data: " + tempLine._contents.toString());
             self.push(tempLine);
           }
           //else strArray.splice(Number(dataIdx), 1) // remove the array item if handleLine returned null
@@ -151,13 +108,7 @@ export function handler(configObj: any, newHandleLine?: TransformCallback) {
           returnErr = new PluginError(PLUGIN_NAME, err);
         }
       }
-      //let data = strArray.join('\n')
-      let data = strArray.join('\n');
-      console.log(data)
-      //file.contents = new Buffer(data)
-
-      // send the transformed file through to the next gulp plugin, and tell the stream engine that we're done with this file
-      //cb(returnErr, file)
+  
       cb(returnErr)
     }
     else if (file.isStream()) {
@@ -170,13 +121,12 @@ export function handler(configObj: any, newHandleLine?: TransformCallback) {
           console.log("\non data: "+ chunk._contents.toString());
           self.push(chunk);
         })
+        .on('end', () => {
+          console.log("There will be no more data.");
+        })
         .on('finish', function () {
           // using finish event here instead of end since this is a Transform stream   https://nodejs.org/api/stream.html#stream_events_finish_and_end
-
           console.log('finished')
-          // send the transformed file goes through to the next gulp plugin
-          //self.push(file)
-          // tell the stream engine that we are done with this file
           cb(returnErr);
         })
         .on('error', function (err: any) {
@@ -188,4 +138,26 @@ export function handler(configObj: any, newHandleLine?: TransformCallback) {
   })
 
   return strm
+}
+
+function getDateStamp(){
+  const dt: Date = new Date()
+  const dateStamp =
+    Number(String(dt.getFullYear()).substr(2, 2))
+      .toString(32)
+      .padStart(2, '0') + // 2-digit year converted to base32
+    (dt.getMonth() + 1).toString(32) + // month (1-12) converted to base32
+    dt.getDate().toString(32) + // day (1-31) converted to base 32
+    '_' +
+    // hmmss, where h is in base32, but mmss is in normal base10 (base 10 for readability; we can't save any digits by using base32)
+    dt.getHours().toString(32) +
+    String(dt.getMinutes()).padStart(2, '0') +
+    String(dt.getSeconds()).padStart(2, '0') +
+    '_' +
+    // milliseconds, in base32
+    dt
+      .getMilliseconds()
+      .toString(32)
+      .padStart(2, '0')
+    return dateStamp;
 }
