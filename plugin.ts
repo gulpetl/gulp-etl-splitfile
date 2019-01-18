@@ -5,8 +5,6 @@ import { ThroughStream } from 'through';
 // import {handler} from 'gulp-datatube-handlelines';
 const through2 = require('through2')
 const split = require('split')
-var from = require('from2');
-var toThrough = require('to-through');
 // consts
 const PLUGIN_NAME = 'gulp-datatube-splitstream';
 
@@ -20,7 +18,7 @@ export function streamSplitter(configObj: any) {
   let index: number = configObj.index ? configObj.index : 1;
   let includeState: boolean = configObj.includeState ? configObj.includeState : false;
   let state: object | null = null;
- 
+
 
   // const handleLine = (lineObj: object | null): object | null => {
   //   const dateStamp = getDateStamp();
@@ -85,27 +83,36 @@ export function streamSplitter(configObj: any) {
   const strm = through2.obj(function (this: any, file: Vinyl, encoding: string, cb: Function) {
     const self = this
     let returnErr: any = null
-   
-
     if (file.isNull()) {
       // return empty file
       return cb(returnErr, file)
     }
     else if (file.isBuffer()) {
-      
+      let filecount: number = 0;
+      let currentfile: Vinyl;
+      currentfile = new Vinyl({
+        path: 'lines' + '-' + getDateStamp() + '-' + filecount + '.txt',
+        contents: Buffer.from('')
+      })
       // strArray will hold file.contents, split into lines
       const strArray = (file.contents as Buffer).toString().split(/\r?\n/)
 
       // we'll call handleLine on each line
       for (let dataIdx in strArray) {
         try {
-
+          if (Number(dataIdx) > 0 && ((Number(dataIdx)) % index == 0 || Number(dataIdx) === strArray.length - 1)) {
+            self.push(currentfile);
+            if (Number(dataIdx) !== strArray.length - 1) {
+              currentfile = new Vinyl({
+                path: 'lines' + '-' + getDateStamp() + '-' + (++filecount) + '.txt',
+                contents: Buffer.from('')
+              })
+            }
+          }
           if (strArray[dataIdx].trim() != "") {
-
+            currentfile.contents = Buffer.concat([(currentfile.contents as Buffer), Buffer.from(strArray[dataIdx] + '\n')])
           }
-          if (Number(dataIdx) == strArray.length - 1) { //if we are at the end of the file, call handleLine(null) push the rest of the data through stream
 
-          }
         } catch (err) {
           returnErr = new PluginError(PLUGIN_NAME, err);
         }
@@ -116,32 +123,40 @@ export function streamSplitter(configObj: any) {
     else if (file.isStream()) {
       let count: number = 0;
       let filecount: number = 0;
-      let currentfile:Vinyl;
+      let currentfile: Vinyl;
 
       file.contents
         // split plugin will split the file into lines
         .pipe(split())
         .on('data', function (chunk: any) {
-          console.log("\non data: " + (chunk));
-          if(count == 0){
+          // console.log("\non data: " + (chunk));
+          if (count == 0) {
             currentfile = new Vinyl({
               path: 'lines' + '-' + getDateStamp() + '-' + filecount + '.txt',
               contents: through2.obj()
-            })
+            });
+            (currentfile.contents as ThroughStream).on('drain',function(){
+              console.log('drain');
+            });
+            (currentfile.contents as ThroughStream).on('error',function(error){
+              returnErr = new PluginError(PLUGIN_NAME,error);
+            });
           }
+    
           if (chunk.trim() != "") { //if chunk is not an empty line, push chunk to currentfile
-            (currentfile.contents as unknown as ThroughStream).push(chunk + '\n');
+            //console.log("push: " + (currentfile.contents as ThroughStream).push(chunk + '\n'));
+            (currentfile.contents as ThroughStream).push(chunk + '\n')
             count++;
           }
 
           //if the number of lines in the current file is equal to the target index param, push file through
           if (count == index) {
-             //https://nodejs.org/api/stream.html#stream_writable_end_chunk_encoding_callback
+            //https://nodejs.org/api/stream.html#stream_writable_end_chunk_encoding_callback
             //need to end writable streams, 'end' signals no more data will be written to the stream
-            (currentfile.contents as unknown as ThroughStream).end()
+            (currentfile.contents as ThroughStream).end()
             self.push(currentfile)
             count = 0;
-            filecount++;    
+            filecount++;
           }
 
         })
@@ -154,7 +169,6 @@ export function streamSplitter(configObj: any) {
 
           if (count > 0) {
             //if end of input stream but still have a file to be pushed
-            
             (currentfile.contents as unknown as ThroughStream).end()
             self.push(currentfile);
           }
