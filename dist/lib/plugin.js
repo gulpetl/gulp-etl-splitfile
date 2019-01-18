@@ -28,7 +28,7 @@ function streamSplitter(configObj) {
                 result += JSON.stringify(lineObj) + '\n';
                 count++;
             }
-            if (count >= index || (!lineObj)) {
+            if (count >= index || lineObj === null) {
                 let newFile = new Vinyl({
                     path: 'lines.txt',
                     contents: Buffer.from(result)
@@ -69,6 +69,23 @@ function streamSplitter(configObj) {
         }
         callback(returnErr);
     };
+    //flushFunction: https://www.npmjs.com/package/through2#flushfunction
+    //Is called just prior to the stream ending. When it is called we know the end of the stream is coming. 
+    //We will call handleline(null) to let our handleline function know that we are at the end of the stream. This will
+    //allow us to push any remaining data through the stream.
+    transformer._flush = function (callback) {
+        let returnErr = null;
+        try {
+            let handledObj = handleLine(null);
+            if (handledObj) {
+                this.push(handledObj);
+            }
+        }
+        catch (err) {
+            returnErr = new PluginError(PLUGIN_NAME, err);
+        }
+        callback(returnErr);
+    };
     // creating a stream through which each file will pass
     // see https://stackoverflow.com/a/52432089/5578474 for a note on the "this" param
     const strm = through2.obj(function (file, encoding, cb) {
@@ -89,7 +106,11 @@ function streamSplitter(configObj) {
                     let lineObj;
                     if (strArray[dataIdx].trim() != "")
                         lineObj = JSON.parse(strArray[dataIdx]);
-                    tempLine = handleLine(lineObj);
+                    if (Number(dataIdx) == strArray.length - 1) { //if we are at the end of the file, call handleLine(null) push the rest of the data through stream
+                        tempLine = handleLine(null);
+                    }
+                    else
+                        tempLine = handleLine(lineObj);
                     if (tempLine)
                         strArray[dataIdx] = JSON.stringify(tempLine);
                     if (tempLine) {
@@ -114,9 +135,6 @@ function streamSplitter(configObj) {
                 .on('data', function (chunk) {
                 console.log("\non data: " + chunk._contents.toString());
                 self.push(chunk);
-            })
-                .on('end', () => {
-                console.log("There will be no more data.");
             })
                 .on('finish', function () {
                 // using finish event here instead of end since this is a Transform stream   https://nodejs.org/api/stream.html#stream_events_finish_and_end

@@ -7,7 +7,7 @@ const plugin_1 = require("./plugin");
 function build_plumber(callback) {
     let result;
     result =
-        gulp.src('./testdata/*', { buffer: false }) //,{ buffer: false }
+        gulp.src('./testdata/*') //,{ buffer: false }
             //.src('./testdata/*') // buffer is true by default
             //        .pipe(plumber({errorHandler:false}))
             //.pipe(lineH.splitStream({fileName:'state.json', removeState:true}))

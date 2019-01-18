@@ -2,11 +2,12 @@ let gulp = require('gulp')
 // import {splitStream} from './plugin'
 // export {splitStream} from './plugin';
 import {streamSplitter} from './plugin';
+const tap = require('gulp-tap');
 
 function build_plumber(callback: any) {
   let result
   result =
-    gulp.src('./testdata/*',{ buffer: false } )//,{ buffer: false }
+    gulp.src('./testdata/*',{ buffer: false } )//
       //.src('./testdata/*') // buffer is true by default
       //        .pipe(plumber({errorHandler:false}))
       //.pipe(lineH.splitStream({fileName:'state.json', removeState:true}))
