@@ -1,6 +1,11 @@
-# gulp-datatube-handlelines #
+# gulp-etl-splitStream #
 
-This is a **data.tube** plugin, and as such it is a [gulp](https://gulpjs.com/) plugin. **data.tube** plugins processes [ndjson](http://ndjson.org/) data streams/files which we call **Message Streams** and which are compliant with the [Singer specification](https://github.com/singer-io/getting-started/blob/master/docs/SPEC.md#output). Message Streams look like this:
+
+
+Split a single Message Stream into multiple. Ideal for chunking a stream into smaller pieces for manageability of file sizes or upload runs to database
+
+This is a **gulp-etl** plugin, and as such it is a [gulp](https://gulpjs.com/) plugin. **gulp-etl** plugins processes [ndjson](http://ndjson.org/) data streams/files which we call **Message Streams** and which are compliant with the [Singer specification](https://github.com/singer-io/getting-started/blob/master/docs/SPEC.md#output). Message Streams look like this:
+
 ```
 {"type": "SCHEMA", "stream": "users", "key_properties": ["id"], "schema": {"required": ["id"], "type": "object", "properties": {"id": {"type": "integer"}}}}
 {"type": "RECORD", "stream": "users", "record": {"id": 1, "name": "Chris"}}
@@ -11,38 +16,15 @@ This is a **data.tube** plugin, and as such it is a [gulp](https://gulpjs.com/) 
 ```
 
 ### Usage
-**data.tube** plugins accept a configObj as its first parameter. The configObj
+**gulp-etl** plugins accept a configObj as its first parameter. The configObj
 will contain any info the plugin needs.
 
 This plugin will check for the following parameters in the configObj:
 
-- `fileName: string` - the path to the place the State will be saved, defaults to `"state.json"`
-- `removeState: boolean` - remove the State from the pipeline or keep, defaults to `false`
-
-##### Sample gulpfile.js
-```
-function build_plumber(callback: any) {
-  let result
-  result =
-    gulp.src('./testdata/*', { buffer: false })
-      .pipe(saveState({fileName:'state.json', removeState:true}))
-      .pipe(gulp.dest('./output/processed'))
-      .on('end', function () {
-        console.log('end')
-        callback()
-      })
-      .on('error', function (err: any) {
-        console.error(err)
-        callback(err)
-      })
-
-  return result;
-}
-```
-### Model Plugin
-This plugin is intended to be a model **data.tube** plugin, usable as a template to be forked to create new plugins for other uses. It is compliant with [best practices for gulp plugins](https://github.com/gulpjs/gulp/blob/master/docs/writing-a-plugin/guidelines.md#what-does-a-good-plugin-look-like), and it properly handles both [buffers](https://github.com/gulpjs/gulp/blob/master/docs/writing-a-plugin/using-buffers.md) and [streams](https://github.com/gulpjs/gulp/blob/master/docs/writing-a-plugin/dealing-with-streams.md).
+- `index:number` - the number of lines in each chunk
 
 ### New-School Code
+
 If you're used to JavaScript code, here are a few newer ES6/ES7/TypeScript code features we use that might be new to you:
 * [Arrow functions](https://www.sitepoint.com/es6-arrow-functions-new-fat-concise-syntax-javascript/) are largely interchangable
  with the more familiar ```function``` syntax:
