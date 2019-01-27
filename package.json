@@ -1,5 +1,5 @@
 {
-  "name": "gulp-datatube-splitstream",
+  "name": "gulp-etl-splitstream",
   "version": "1.0.0",
   "description": "Splits vinyl object stream into multiple",
   "main": "dist/js/gulpfile.js",
@@ -8,7 +8,7 @@
     "dist"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "build-codeonly": "tsc && tsc --module commonjs --outDir dist/lib"
   },
   "author": "",
@@ -27,11 +27,38 @@
     "@types/fs-extra": "^5.0.4",
     "@types/gulp-plumber": "0.0.32",
     "@types/highland": "^2.12.1",
+    "@types/jest": "^23.3.13",
     "@types/node": "^10.12.18",
     "@types/split": "^1.0.0",
     "@types/vinyl": "^2.0.2",
     "gulp": "^4.0.0",
+    "jest": "^24.0.0",
+    "ts-jest": "^23.10.5",
     "ts-node": "^7.0.1",
     "typescript": "^3.2.2"
+  },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/test/"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 90,
+        "functions": 95,
+        "lines": 95,
+        "statements": 95
+      }
+    },
+    "verbose":true
   }
 }
