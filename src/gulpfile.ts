@@ -1,15 +1,18 @@
 let gulp = require('gulp')
 // import {splitStream} from './plugin'
 // export {splitStream} from './plugin';
-import {splitStream} from './plugin';
+import { splitStream } from './plugin';
 
 
 function build_plumber(callback: any) {
   let result
   result =
-    gulp.src('../testdata/*')//,{ buffer: false } 
-      .pipe(splitStream({index: 10000}))
-       .on('error', console.error.bind(console))
+    gulp.src('../testdata/*',{ buffer: false })// 
+      .pipe(splitStream({ index: 3 }))
+      .on('data', function(chunk:any){
+        console.log(chunk.contents.toString())
+      })
+      .on('error', console.error.bind(console))
       // .on('error', function(this:any,err: any) {
       //   console.error(err)
       //   err.showStack = true
