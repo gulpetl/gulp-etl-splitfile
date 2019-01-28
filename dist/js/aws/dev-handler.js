@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const handler = require("./handler");
 let event = { resource: '/doparse',
     path: '/doparse',
     httpMethod: 'POST',
@@ -73,5 +72,15 @@ let event = { resource: '/doparse',
         apiId: 'x6i61wo8pb' },
     body: '{\n\t"config":{\n\t\t"index":2\n\t},\n\t"toParse": "{\\"type\\":\\"STATE\\",\\"value\\":{\\"envelope\\":{\\"to\\":[],\\"cc\\":[],\\"from\\":[],\\"bcc\\":[]},\\"tap_log\\":[{\\"tap_name\\":\\"parseFlat\\",\\"result\\":{\\"linesRead\\":{\\"USDA_Class\\":3}}}],\\"errors\\":[]} }\\r\\n{\\"type\\":\\"RECORD\\",\\"stream\\":\\"Bale\\",\\"record\\":{\\"Gin Code Number\\":60115,\\"Gin Bale Number\\":1119458,\\"Date Classed\\":\\"2015-09-03T00:00:00.000Z\\",\\"Module, Trailer, or Single Bale\\":0,\\"Module\\/Trailer Number\\":\\"00000\\",\\"Bales in Module\\/Trailer\\":0,\\"Official Color Grade\\":42,\\"Fiber Staple Length\\":37,\\"Micronaire\\":36,\\"Strength\\":317,\\"Leaf Grade\\":4,\\"Extraneous Matter\\":0,\\"Remarks\\":0,\\"Instrument ColorCode\\":42,\\"Color Quadrant\\":1,\\"Color Rd\\":733,\\"Color +b\\":91,\\"Non-Lint Content (Trash Percent Area)\\":8,\\"Length Uniformity Index (Percent)\\":820,\\"Upland or Pima\\":1,\\"Record Type\\":0,\\"Record Status\\":0,\\"CCC Loan Premiums and Discounts\\":\\"-0035\\"} }\\r\\n{\\"type\\":\\"RECORD\\",\\"stream\\":\\"Bale\\",\\"record\\":{\\"Gin Code Number\\":60115,\\"Gin Bale Number\\":1119463,\\"Date Classed\\":\\"2015-09-03T00:00:00.000Z\\",\\"Module, Trailer, or Single Bale\\":0,\\"Module\\/Trailer Number\\":\\"00000\\",\\"Bales in Module\\/Trailer\\":0,\\"Official Color Grade\\":42,\\"Fiber Staple Length\\":37,\\"Micronaire\\":34,\\"Strength\\":302,\\"Leaf Grade\\":5,\\"Extraneous Matter\\":0,\\"Remarks\\":0,\\"Instrument ColorCode\\":42,\\"Color Quadrant\\":1,\\"Color Rd\\":725,\\"Color +b\\":92,\\"Non-Lint Content (Trash Percent Area)\\":8,\\"Length Uniformity Index (Percent)\\":809,\\"Upland or Pima\\":1,\\"Record Type\\":0,\\"Record Status\\":0,\\"CCC Loan Premiums and Discounts\\":\\"-0425\\"} }\\r\\n{\\"type\\":\\"RECORD\\",\\"stream\\":\\"Bale\\",\\"record\\":{\\"Gin Code Number\\":60115,\\"Gin Bale Number\\":1119463,\\"Date Classed\\":\\"2015-09-03T00:00:00.000Z\\",\\"Module, Trailer, or Single Bale\\":0,\\"Module\\/Trailer Number\\":\\"00000\\",\\"Bales in Module\\/Trailer\\":0,\\"Official Color Grade\\":42,\\"Fiber Staple Length\\":37,\\"Micronaire\\":34,\\"Strength\\":302,\\"Leaf Grade\\":5,\\"Extraneous Matter\\":0,\\"Remarks\\":0,\\"Instrument ColorCode\\":42,\\"Color Quadrant\\":1,\\"Color Rd\\":725,\\"Color +b\\":92,\\"Non-Lint Content (Trash Percent Area)\\":8,\\"Length Uniformity Index (Percent)\\":809,\\"Upland or Pima\\":1,\\"Record Type\\":0,\\"Record Status\\":0,\\"CCC Loan Premiums and Discounts\\":\\"-0425\\"} }\\r\\n{\\"type\\":\\"RECORD\\",\\"stream\\":\\"Bale\\",\\"record\\":{\\"Gin Code Number\\":60115,\\"Gin Bale Number\\":1119463,\\"Date Classed\\":\\"2015-09-03T00:00:00.000Z\\",\\"Module, Trailer, or Single Bale\\":0,\\"Module\\/Trailer Number\\":\\"00000\\",\\"Bales in Module\\/Trailer\\":0,\\"Official Color Grade\\":42,\\"Fiber Staple Length\\":37,\\"Micronaire\\":34,\\"Strength\\":302,\\"Leaf Grade\\":5,\\"Extraneous Matter\\":0,\\"Remarks\\":0,\\"Instrument ColorCode\\":42,\\"Color Quadrant\\":1,\\"Color Rd\\":725,\\"Color +b\\":92,\\"Non-Lint Content (Trash Percent Area)\\":8,\\"Length Uniformity Index (Percent)\\":809,\\"Upland or Pima\\":1,\\"Record Type\\":0,\\"Record Status\\":0,\\"CCC Loan Premiums and Discounts\\":\\"-0425\\"} }\\r\\n{\\"type\\":\\"STATE\\",\\"value\\":{\\"envelope\\":{\\"to\\":[],\\"cc\\":[],\\"from\\":[],\\"bcc\\":[]},\\"tap_log\\":[{\\"tap_name\\":\\"parseFlat\\",\\"result\\":{\\"linesRead\\":{\\"USDA_Class\\":3}}}],\\"errors\\":[]} }"\n}',
     isBase64Encoded: false };
-handler.doParse(event, null, () => { });
+//handler.doParse(event,null,()=>{});
+const plugin_1 = require("../plugin");
+const from = require('from2');
+const Vinyl = require('vinyl');
+let fakeFile = new Vinyl({
+    contents: Buffer.from('')
+});
+from.obj([fakeFile]).pipe(plugin_1.splitStream({}))
+    .on('data', function (file) {
+    console.log("file: " + file);
+});
 //# sourceMappingURL=dev-handler.js.map

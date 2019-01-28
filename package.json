@@ -8,7 +8,8 @@
     "dist"
   ],
   "scripts": {
-    "test": "jest --noStackTrace",
+    "test-noStackTrace": "jest --noStackTrace",
+    "test": "jest",
     "build-codeonly": "tsc && tsc --module commonjs --outDir dist/lib"
   },
   "author": "",

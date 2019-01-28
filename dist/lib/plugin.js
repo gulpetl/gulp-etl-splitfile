@@ -24,8 +24,8 @@ function splitStream(configObj) {
         else if (file.isBuffer()) {
             let filecount = 0;
             // strArray will hold file.contents, split into lines
-            const strArray = file.contents.toString().split(/\r?\n/);
             try {
+                const strArray = file.contents.toString().split(/\r?\n/);
                 let i = 0;
                 while (strArray.length > 0) {
                     if ((index) < strArray.length) {
@@ -53,7 +53,12 @@ function splitStream(configObj) {
             catch (err) {
                 returnErr = new PluginError(PLUGIN_NAME, err);
             }
-            cb(returnErr);
+            if (filecount != 0) {
+                cb(returnErr);
+            }
+            else {
+                cb(returnErr, file);
+            }
         }
         else if (file.isStream()) {
             let count = 0;

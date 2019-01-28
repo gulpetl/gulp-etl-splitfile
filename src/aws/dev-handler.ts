@@ -85,17 +85,13 @@ const from = require('from2');
 const Vinyl = require('vinyl');
 
 let fakeFile = new Vinyl({
-    contents: from(['{"type":"STATE"}\n{"type":"RECORD"}\n{"type":"RECORD"}\n{"type":"RECORD"}'])
+    contents: Buffer.from('')
 })
 
 
 from.obj([fakeFile]).pipe(splitStream({}))
-.once('data', function(file:any){
-    
-    //console.log("file: " + JSON.stringify(file))
-    file.contents.on('data', function(chunk:any){
-        console.log(chunk);
-    })
+.on('data', function(file:any){
+    console.log("file: " + file);
 })
 
 
