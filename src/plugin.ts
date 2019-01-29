@@ -1,13 +1,11 @@
 import PluginError = require('plugin-error');
 import Vinyl = require('vinyl')
-import { writeFileSync } from 'fs-extra';
-import { ThroughStream } from 'through';
-// import {handler} from 'gulp-datatube-handlelines';
+import { Transform } from 'stream';
 const through2 = require('through2')
-const split = require('split')
+const split = require('split2')
+
 // consts
 const PLUGIN_NAME = 'gulp-datatube-splitstream';
-
 
 export type TransformCallback = (lineObj: Object) => Object | null
 type EOF = "EOF";
@@ -84,7 +82,7 @@ export function splitStream(configObj: any) {
           }
 
           if (chunk.trim() != "") {
-            (currentfile.contents as ThroughStream).push(chunk + '\n')
+            (currentfile.contents as Transform).push(chunk + '\n')
             count++;
           }
 
@@ -92,7 +90,7 @@ export function splitStream(configObj: any) {
           if (count == index) {
             //https://nodejs.org/api/stream.html#stream_writable_end_chunk_encoding_callback
             //need to end writable streams, 'end' signals no more data will be written to the stream
-            (currentfile.contents as ThroughStream).end()
+            (currentfile.contents as Transform).end()
             count = 0;
           }
 
@@ -104,7 +102,7 @@ export function splitStream(configObj: any) {
         })
         .on('end', function () {
 
-          (currentfile.contents as unknown as ThroughStream).end()
+          (currentfile.contents as unknown as Transform).end()
      
           console.log('end');
           cb(returnErr);

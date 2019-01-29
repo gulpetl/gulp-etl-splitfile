@@ -2,9 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const PluginError = require("plugin-error");
 const Vinyl = require("vinyl");
-// import {handler} from 'gulp-datatube-handlelines';
 const through2 = require('through2');
-const split = require('split');
+const split = require('split2');
 // consts
 const PLUGIN_NAME = 'gulp-datatube-splitstream';
 /* This is a model data.tube plugin. It is compliant with best practices for Gulp plugins (see

@@ -7,9 +7,6 @@ function build_plumber(callback) {
     result =
         gulp.src('../testdata/*', { buffer: false }) //, { buffer: false } 
             .pipe(plugin_1.splitStream({}))
-            .on('data', function (file) {
-            console.log(file.contents);
-        })
             .on('error', console.error.bind(console))
             .pipe(gulp.dest('../output/processed'))
             .on('end', function () {
