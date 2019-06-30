@@ -1,8 +1,8 @@
-# gulp-etl-splitStream #
+# gulp-etl-splitfile #
 
 
 
-Split a single Message Stream into multiple. Ideal for chunking a stream into smaller pieces for manageability of file sizes or upload runs to database
+Split a single Message Stream file into multiple. Ideal for chunking a stream into smaller pieces for manageability of file sizes or upload runs to database
 
 This is a **gulp-etl** plugin, and as such it is a [gulp](https://gulpjs.com/) plugin. **gulp-etl** plugins processes [ndjson](http://ndjson.org/) data streams/files which we call **Message Streams** and which are compliant with the [Singer specification](https://github.com/singer-io/getting-started/blob/master/docs/SPEC.md#output). Message Streams look like this:
 
@@ -35,12 +35,8 @@ This plugin will check for the following parameters in the configObj:
 * Clone this repo and  run `npm install` to install npm packages
 * Debug: with [VScode](https://code.visualstudio.com/download) use `Open Folder` to open the project folder, then hit F5 to debug. This runs without compiling to javascript using [ts-node](https://www.npmjs.com/package/ts-node)
 * Test: `npm test` or `npm t`
-* Compile to javascript: `npm run build-codeonly`
-* Deploy to AWS using serverless: `serverless deploy --aws-profile [profilename]`
-    * depends on [aws-cli](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html) [named profiles](http://docs.aws.amazon.com/cli/latest/userguide/cli-multiple-profiles.html)
-    * additional setup is necessary; details are [here](aws-deploy.md) (adapted from [this fork](https://github.com/theSaltyConditional/tap-ts-starter), s/o to [theSaltyConditional](https://github.com/theSaltyConditional))
-* More options are included from [TypeScript Library Starter](https://github.com/alexjoverm/typescript-library-starter.git) and are documented [here](starter-README.md)
-* Run using included test data (be sure to build first): `node dist/tap-main.cjs.js --config tap-config.json`
+* Compile to javascript: `npm run build`
+* Run using included test data (be sure to build first): `gulp --gulpfile debug/gulpfile.ts`
 
 ### Testing
 

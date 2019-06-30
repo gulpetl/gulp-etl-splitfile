@@ -5,14 +5,14 @@ const through2 = require('through2')
 const split = require('split2')
 
 // consts
-const PLUGIN_NAME = 'gulp-datatube-splitstream';
+const PLUGIN_NAME = 'gulp-datatube-splitfile';
 
 export type TransformCallback = (lineObj: Object) => Object | null
 type EOF = "EOF";
 /* This is a model data.tube plugin. It is compliant with best practices for Gulp plugins (see
 https://github.com/gulpjs/gulp/blob/master/docs/writing-a-plugin/guidelines.md#what-does-a-good-plugin-look-like ),
 but with an additional feature: it accepts a configObj as its first parameter */
-export function splitStream(configObj: any) {
+export function splitFile(configObj: any) {
   let index: number = configObj.index ? configObj.index : 1;
 
   // creating a stream through which each file will pass
@@ -79,6 +79,8 @@ export function splitStream(configObj: any) {
               contents: through2.obj()
             });
             self.push(currentfile);
+
+            console.log('writing ' + currentfile.basename);            
           }
 
           if (chunk.trim() != "") {
@@ -94,11 +96,6 @@ export function splitStream(configObj: any) {
             count = 0;
           }
 
-        })
-        .on('finish', function () {
-          // using finish event here instead of end since this is a Transform stream   https://nodejs.org/api/stream.html#stream_events_finish_and_end
-          console.log('finished')
-          cb(returnErr);
         })
         .on('end', function () {
 

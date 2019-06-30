@@ -5,11 +5,11 @@ const Vinyl = require("vinyl");
 const through2 = require('through2');
 const split = require('split2');
 // consts
-const PLUGIN_NAME = 'gulp-datatube-splitstream';
+const PLUGIN_NAME = 'gulp-datatube-splitfile';
 /* This is a model data.tube plugin. It is compliant with best practices for Gulp plugins (see
 https://github.com/gulpjs/gulp/blob/master/docs/writing-a-plugin/guidelines.md#what-does-a-good-plugin-look-like ),
 but with an additional feature: it accepts a configObj as its first parameter */
-function splitStream(configObj) {
+function splitFile(configObj) {
     let index = configObj.index ? configObj.index : 1;
     // creating a stream through which each file will pass
     // see https://stackoverflow.com/a/52432089/5578474 for a note on the "this" param
@@ -74,6 +74,7 @@ function splitStream(configObj) {
                         contents: through2.obj()
                     });
                     self.push(currentfile);
+                    console.log('writing ' + currentfile.basename);
                 }
                 if (chunk.trim() != "") {
                     currentfile.contents.push(chunk + '\n');
@@ -86,11 +87,6 @@ function splitStream(configObj) {
                     currentfile.contents.end();
                     count = 0;
                 }
-            })
-                .on('finish', function () {
-                // using finish event here instead of end since this is a Transform stream   https://nodejs.org/api/stream.html#stream_events_finish_and_end
-                console.log('finished');
-                cb(returnErr);
             })
                 .on('end', function () {
                 currentfile.contents.end();
@@ -105,7 +101,7 @@ function splitStream(configObj) {
     });
     return strm;
 }
-exports.splitStream = splitStream;
+exports.splitFile = splitFile;
 function getDateStamp() {
     const dt = new Date();
     const dateStamp = Number(String(dt.getFullYear()).substr(2, 2))

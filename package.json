@@ -1,19 +1,27 @@
 {
-  "name": "gulp-etl-splitstream",
+  "name": "gulp-etl-splitfile",
   "version": "1.0.0",
-  "description": "Splits vinyl object stream into multiple",
+  "repository": "https://github.com/gulpetl/gulp-etl-splitfile",
+  "description": "Splits gulp-etl Message Stream files into multiple files",
   "main": "dist/js/gulpfile.js",
   "typings": "dist/types/gulpfile.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
-    "test-noStackTrace": "jest --noStackTrace",
-    "test": "jest",
-    "build-codeonly": "tsc && tsc --module commonjs --outDir dist/lib"
+    "build": "tsc",
+    "prebuild": "npm run clean",
+    "clean": "rimraf dist/*",
+    "test": "jest"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "peterl@sbcotton.com",
+  "license": "MIT",
+  "keywords": [
+    "gulpplugin",
+    "gulp",
+    "gulp-etl"
+  ],
+  "homepage": "https://gulpetl.com",
   "dependencies": {
     "from2": "^2.3.0",
     "fs-extra": "^7.0.1",
@@ -28,7 +36,7 @@
     "@types/node": "^10.12.18",
     "@types/vinyl": "^2.0.2",
     "gulp": "^4.0.0",
-    "jest": "^23.6.0",
+    "jest": "^24.8.0",
     "jest-spec-reporter": "^1.0.5",
     "ts-jest": "^23.10.5",
     "ts-node": "^7.0.1",
