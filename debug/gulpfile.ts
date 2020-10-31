@@ -11,7 +11,8 @@ function runSplitFile(callback: any) {
       // .pipe(splitFile({index:2, timeStamp:true })) 
       // .pipe(splitFile({groupBy:'.type', index:2 })) // cause error by using groupBy and index together
       // .pipe(splitFile({groupBy:['.type', '.stream']})) // group by `type` and then `stream`
-      .pipe(splitFile({groupBy:'.record ."Leaf Grade", .type:val("STATE")' })) // group by record.Leaf Grade, and also type (if it is "STATE")
+      // .pipe(splitFile({groupBy:'.record ."Leaf Grade", .type:val("STATE")' })) // group by record.Leaf Grade, and also type (if it is "STATE")
+      .pipe(splitFile({groupBy:'.record ."Leaf Grade", .record .Micronaire, .type:val("STATE")' })) // group by `record.Leaf Grade`+`record.Micronaire`, and also type (if it is "STATE")
 
       .on('error', console.error.bind(console))
       .pipe(gulp.dest('../testdata/processed'))

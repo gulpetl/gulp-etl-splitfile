@@ -13,21 +13,16 @@ https://github.com/gulpjs/gulp/blob/master/docs/writing-a-plugin/guidelines.md#w
 but with an additional feature: it accepts a configObj as its first parameter */
 function splitFile(configObj) {
     let returnErr = null;
-    let index = configObj.index ? configObj.index : null;
-    let separator = configObj.separator ? configObj.separator : "_";
-    let timeStamp = configObj.timeStamp ? configObj.timeStamp : false;
+    let index = configObj.index || null;
+    let separator = configObj.separator || "_";
+    let timeStamp = configObj.timeStamp || false;
     let groupFields = [];
-    let groupFiles = {};
     if (configObj.groupBy) {
-        if (Array.isArray(configObj.groupBy)) {
-            // groupFields.forEach( function () {})
-            // groupFields.forEach( () => {})
-            configObj.groupBy.forEach((grpStr) => { groupFields.push(grpStr); });
-        }
-        else if (typeof configObj.groupBy === "string")
+        if (Array.isArray(configObj.groupBy))
+            configObj.groupBy.forEach((group) => { groupFields.push(group); });
+        else
             groupFields.push(configObj.groupBy);
         if (index)
-            // can't use index and groupBy together
             returnErr = new PluginError(PLUGIN_NAME, "can't use index and groupBy together");
     }
     else if (!index)
@@ -36,6 +31,7 @@ function splitFile(configObj) {
     // see https://stackoverflow.com/a/52432089/5578474 for a note on the "this" param
     const strm = through2.obj(function (file, encoding, cb) {
         const self = this;
+        let groupFiles = {};
         let count = 0;
         let filecount = 0;
         let currentfile;
@@ -43,10 +39,13 @@ function splitFile(configObj) {
             let lineValue = "";
             let lineObj = JSON.parse(line);
             groupFields.forEach(fld => {
-                if (lineValue != "")
-                    lineValue += separator;
                 try {
-                    lineValue += select.match(fld, lineObj);
+                    let matches = select.match(fld, lineObj);
+                    matches.forEach((match) => {
+                        if (lineValue != "")
+                            lineValue += separator;
+                        lineValue += match;
+                    });
                 }
                 catch (err) {
                     lineValue = "unknown";

@@ -17,7 +17,8 @@ This is a **gulp-etl** plugin, and as such it is a [gulp](https://gulpjs.com/) p
 ## Usage ##
 
 ``` javascript
-splitFile = require('gulp-etl-splitfile');
+const splitFile = require('gulp-etl-splitfile').splitFile; // javascript
+import { splitFile } from 'gulp-etl-splitfile';            // typescript
 ```
 
 **gulp-etl** plugins accept a configObj as its first parameter. The configObj
@@ -25,7 +26,7 @@ will contain any info the plugin needs.
 
 Available configObj properties for this plugin:
 
-- `index:number` - the number of lines in each new file. Cannot be combined with `groupBy`.
+- `index:number` - The maximum number of lines in each new file. Cannot be combined with `groupBy`.
 
 ``` javascript
 .pipe(splitFile({index:1000}))                // Split out a new file every 1000 lines
@@ -33,17 +34,16 @@ Available configObj properties for this plugin:
 .pipe(splitFile({}))                          // default (no options): split out a new file for every line
 ```
 
-- `groupBy:string|array` - value(s) in lines to split lines between files; uses [JSONSelect](https://www.npmjs.com/package/JSONSelect). Cannot be combined with `index`.
+- `groupBy:string|array` - Value(s) in lines to split lines between files; uses [JSONSelect](https://www.npmjs.com/package/JSONSelect). Cannot be combined with `index`.
 
 ``` javascript
 .pipe(splitFile({groupBy:'.type'}))                                     // group by (split lines to new files based on) the value of the "type" property of each line
-.pipe(splitFile({groupBy:9999 }))                                       // cause error with invalid groupBy (not a string. Also, not a reference to a line property...)
 .pipe(splitFile({groupBy:['.type', ".stream"]}))                        // group by `type` and then `stream`
 .pipe(splitFile({groupBy:'.record .name'}))                             // group by `record.name` property)
 .pipe(splitFile({groupBy:'.record ."Last Name", .type:val("STATE")' })) // group by `record.Last Name`, and/or by `type` (if it is equal to "STATE")
 ```
 
-- `separator:string` - character(s) to separate sections of file names
+- `separator:string` - Character(s) to separate sections of file names
 
 ``` javascript
 // splitting `file.ndjson`
@@ -53,7 +53,7 @@ Available configObj properties for this plugin:
 .pipe(splitFile({groupBy:['.type', ".stream"]}))   // -> `file_SCHEMA_users.ndjson`, `file-RECORD_users.ndjson`...
 ```
 
-- `timeStamp:boolean` - add a shortened string to all filenames based on the current time; use to keep successive runs from overwriting results from those before
+- `timeStamp:boolean` - Add a shortened string to all filenames based on the current time? use to keep successive runs from overwriting results from those before
 
 ``` javascript
 .pipe(splitFile({index:1000, timeStamp:true }))    // -> `file_l4514_fe_0.ndjson`, `file_l4514_fe_1.ndjson`...

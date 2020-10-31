@@ -10,32 +10,40 @@ const PLUGIN_NAME = 'gulp-etl-splitfile';
 
 export type TransformCallback = (lineObj: Object) => Object | null
 
+interface ConfigObj {
+  /** The maximum number of lines in each new file. Cannot be combined with `groupBy` */
+  index?: number
+
+  /** Value(s) in lines to split lines between files; uses [JSONSelect](https://www.npmjs.com/package/JSONSelect). Cannot be combined with `index` */
+  groupBy?:string
+
+  /** Character(s) to separate sections of file names */
+  separator?: string
+
+  /** Add a shortened string to all filenames based on the current time? use to keep successive runs from overwriting results from those before */
+  timeStamp?: boolean
+}
+
 /* This is a model gulp-etl plugin. It is compliant with best practices for Gulp plugins (see
 https://github.com/gulpjs/gulp/blob/master/docs/writing-a-plugin/guidelines.md#what-does-a-good-plugin-look-like ),
 but with an additional feature: it accepts a configObj as its first parameter */
-export function splitFile(configObj: any) {
+export function splitFile(configObj: ConfigObj) {
   let returnErr: any = null
 
-  let index: number = configObj.index ? configObj.index : null;
-  let separator: string = configObj.separator ? configObj.separator : "_";
-  let timeStamp: string = configObj.timeStamp ? configObj.timeStamp : false;
+  let index: number|null = configObj.index || null;
+  let separator: string = configObj.separator || "_";
+  let timeStamp: boolean = configObj.timeStamp || false;
 
-  let groupFields: Array<string> = []
-  let groupFiles: any = {}
+  let groupFields: Array<any> = []
 
   if (configObj.groupBy) {
-    if (Array.isArray(configObj.groupBy)){
-      // groupFields.forEach( function () {})
-      // groupFields.forEach( () => {})
-      configObj.groupBy.forEach( (grpStr:string) => {groupFields.push(grpStr)})
-    }
-    else if (typeof configObj.groupBy === "string")
+    if (Array.isArray(configObj.groupBy))
+      configObj.groupBy.forEach( (group:any) => {groupFields.push(group)})
+    else
       groupFields.push(configObj.groupBy)
 
     if (index)
-      // can't use index and groupBy together
       returnErr = new PluginError(PLUGIN_NAME, "can't use index and groupBy together")
-
   }
   else if (!index) index = 1; // default index to 1 if there is nothing else to do; we'll split each line to its own file
 
@@ -44,6 +52,7 @@ export function splitFile(configObj: any) {
   const strm = through2.obj(function (this: any, file: Vinyl, encoding: string, cb: Function) {
     const self = this
 
+    let groupFiles: any = {}
     let count: number = 0;
     let filecount: number = 0;
     let currentfile: Vinyl;
@@ -53,10 +62,14 @@ export function splitFile(configObj: any) {
       let lineObj = JSON.parse(line);
 
       groupFields.forEach(fld => {
-        if (lineValue != "")
-          lineValue += separator
         try {
-          lineValue += select.match(fld, lineObj)
+          let matches: Array<any> = select.match(fld, lineObj)
+
+          matches.forEach( (match:any) => {
+            if (lineValue != "")
+              lineValue += separator
+            lineValue += match
+          })
         }
         catch (err) {
           lineValue = "unknown"
@@ -74,7 +87,6 @@ export function splitFile(configObj: any) {
           path: newPath,
           contents: through2.obj()
         })
-
 
         groupFiles[lineValue] = newFile
         self.push(newFile)
