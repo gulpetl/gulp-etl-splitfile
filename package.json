@@ -1,6 +1,6 @@
 {
   "name": "gulp-etl-splitfile",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "repository": "https://github.com/gulpetl/gulp-etl-splitfile",
   "description": "Splits gulp-etl Message Stream files into multiple files",
   "main": "dist/js/gulpfile.js",
